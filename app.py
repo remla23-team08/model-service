@@ -9,24 +9,24 @@ swagger = Swagger(app)
 def predict():
 	"""
 	Make a hardcoded prediction
-	---
-	consumes:
-		- application/json
-	parameters:
-		- name: input_data
-		in: body
-		description: input to be predicted.
-		required: True
-		schema:
-			type: object
-			required: review
-			properties:
-				review:
-					type: string
-					example: "this is a good/bad review"
-	responses:
-		200:
-			description: prediction
+    ---
+    consumes:
+      - application/json
+    parameters:
+        - name: input_data
+          in: body
+          description: review to be classified.
+          required: True
+          schema:
+            type: object
+            required: review
+            properties:
+                review:
+                    type: string
+                    example: This is a bad/good review
+    responses:
+      200:
+        description: Some result
 	"""
 
 	# Retrieve review from the request
@@ -37,5 +37,8 @@ def predict():
 
 	return {
 		"review": review,
-		"prediction": prediction,
+		"prediction": int(prediction),
 	}
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080, debug=True)
