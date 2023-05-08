@@ -1,11 +1,14 @@
+import flask
 from flask import Flask, request
 from model import model_predict
+from flask_cors import CORS
 from flasgger import Swagger
 
 app = Flask(__name__)
+CORS(app)
 swagger = Swagger(app)
 
-@app.post('/predict', )
+@app.route('/predict', methods=['POST'])
 def predict():
 	"""
 	Make a hardcoded prediction
@@ -35,10 +38,12 @@ def predict():
 	# Make a prediction on the message
 	prediction = model_predict(review)
 
-	return {
+	response = flask.jsonify({
 		"review": review,
 		"prediction": int(prediction),
-	}
+	})
+
+	return response
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=True)
