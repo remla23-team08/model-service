@@ -5,7 +5,7 @@ from flasgger import Swagger
 app = Flask(__name__)
 swagger = Swagger(app)
 
-@app.post('/Predict', )
+@app.post('/predict', )
 def predict():
 	"""
 	Make a hardcoded prediction
@@ -15,17 +15,27 @@ def predict():
 	parameters:
 		- name: input_data
 		in: body
-		description: input to get predicted.
+		description: input to be predicted.
 		required: True
 		schema:
 			type: object
+			required: review
 			properties:
-				input: TBD
-				example: TBD
+				review:
+					type: string
+					example: "this is a good/bad review"
 	responses:
 		200:
 			description: prediction
 	"""
 
-	input = request.get_json().get('input')
-	return model_predict(input)
+	# Retrieve review from the request
+	review = request.get_json().get('review')
+
+	# Make a prediction on the message
+	prediction = model_predict(review)
+
+	return {
+		"review": review,
+		"prediction": prediction,
+	}
