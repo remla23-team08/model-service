@@ -4,3 +4,4 @@ joblib
 scikit-learn
 nltk
 flask-cors
+flake8
