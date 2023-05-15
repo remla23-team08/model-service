@@ -73,6 +73,35 @@ docker run -p 8080:8080 ghcr.io/remla23-team08/model-service:VERSION
 > * The first port number in the `-p` flag is the port on your local machine, while the second port number is the port on the docker container. The two port numbers should be the same, however, if the local port is already in use, you can change it to any other port number (consider taking a look at port numbering conventions depending on your operating system).
 > * You can also run the docker image in detached mode by adding the `-d` flag to the `docker run` command. This is helpful when you want to issue other commands in the same terminal window.
 
+## **Code Style**
+
+For coding style, we are following the [PEP 8 -- Style Guide for Python Code](https://www.python.org/dev/peps/pep-0008/). For automatic detection, 
+we are using the [flake8](https://flake8.pycqa.org/en/latest/) tool. To install it, execute the following command:
+
+```bash
+pip install flake8
+```
+
+> **NOTE**: It is preffered to use a `venv` to install packages, as mentioned in the [Usage](#usage) section.
+
+To run the flake8 tool on the python files using our custom configuration, execute the following command from within the root folder of this repository:
+
+```bash
+flake8 --config=config/flake8.cfg *.py
+```
+
+To automatically enforce the code style, we are using the [black](https://black.readthedocs.io/en/stable/) tool. To install it, execute the following command:
+
+```bash
+pip install black
+```
+
+Afterwards, simply run the following command from within the root folder of this repository:
+
+```bash
+black *.py
+```
+
 ## **Versioning**
 
 Versioning of this repository is done automatically using GitHub Actions. The versioning is done using the standard Semantic Versioning (SemVer) format. Version bumps are done automatically when a PR is merged to the `main` branch. To achieve this, we are using the GitVersion tool. For more information on how to use GitVersion, see [this link](https://gitversion.net/docs/).
