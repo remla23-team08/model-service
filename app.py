@@ -1,5 +1,5 @@
 import flask
-from flask import Flask, request
+from flask import Flask, request, Response
 from model import model_predict
 from flask_cors import CORS
 from flasgger import Swagger
@@ -10,6 +10,7 @@ swagger = Swagger(app)
 
 countPosPredictions = 0
 countNegPredictions = 0
+
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -41,12 +42,13 @@ def predict():
 	# Make a prediction on the message
 	prediction = int(model_predict(review))
 
+	# Update counter based on prediction
 	if prediction == 0:
-	    global countNegPredictions
-        countNegPredictions += 1
-    else:
-	    global countPosPredictions
-        countPosPredictions += 1
+		global countNegPredictions
+		countNegPredictions += 1
+	else:
+		global countPosPredictions
+		countPosPredictions += 1
 
 	response = flask.jsonify({
 		"review": review,
@@ -55,20 +57,24 @@ def predict():
 
 	return response
 
+
 @app.route('/metrics', methods=['GET'])
 def metrics():
-    global countNegPredictions, countPosPredictions
-    m = "# HELP my_random This is just a random 'gauge' for illustration.\n"
-    m+= "# TYPE my_random gauge\n"
-    m+= "my_random " + str(random()) + "\n\n"
+	global countNegPredictions, countPosPredictions
+	m = "# HELP num_predictions The number of predictions that have been served.\n"
+	m += "# TYPE num_predictions counter\n"
+	m += "num_predictions{{page=\"predict\"}} {}\n".format(countPosPredictions + countNegPredictions)
 
-    m+= "# HELP num_requests The number of requests that have been served, by page.\n"
-    m+= "# TYPE num_requests counter\n"
-    m+= "num_pos_requests{{page=\"predict\"}} {}\n".format(countPosPredictions)
-    m+= "num_neg_requests{{page=\"predict\"}} {}\n".format(countNegPredictions)
-    m+= "num_requests{{page=\"predict\"}} {}\n".format(countPosPredictions + countNegPredictions)
+	m += "# HELP num_pos_predictions The number of positive predictions that have been served.\n"
+	m += "# TYPE num_pos_predictions counter\n"
+	m += "num_pos_predictions{{page=\"predict\"}} {}\n".format(countPosPredictions)
 
-    return Response(m, mimetype="text/plain")
+	m += "# HELP num_neg_predictions The number of negative predictions that have been served.\n"
+	m += "# TYPE num_neg_predictions counter\n"
+	m += "num_neg_predictions{{page=\"predict\"}} {}\n".format(countNegPredictions)
+
+	return Response(m, mimetype="text/plain")
+
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=True)
+	app.run(host="0.0.0.0", port=8080, debug=True)
