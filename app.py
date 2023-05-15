@@ -64,8 +64,8 @@ def metrics():
 
     m+= "# HELP num_requests The number of requests that have been served, by page.\n"
     m+= "# TYPE num_requests counter\n"
-    m+= "num_pos_requests{{page=\"predict\"}} {}\n".format(countIdx)
-    m+= "num_neg_requests{{page=\"predict\"}} {}\n".format(countSub)
+    m+= "num_pos_requests{{page=\"predict\"}} {}\n".format(countPosPredictions)
+    m+= "num_neg_requests{{page=\"predict\"}} {}\n".format(countNegPredictions)
     m+= "num_requests{{page=\"predict\"}} {}\n".format(countPosPredictions + countNegPredictions)
 
     return Response(m, mimetype="text/plain")
