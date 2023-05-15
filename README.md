@@ -22,6 +22,7 @@ Run the application from the root folder by executing the following command
 	python app.py
 
 A Flask server will be made available at <http://localhost:8080> where the API documentation is available at <http://localhost:8080/apidocs>.
+Application metrics can be accessed at <http://localhost:8080/metrics>.
 <!-- 
 ## Run through Docker
 
