@@ -60,6 +60,12 @@ def predict():
 
 @app.route('/metrics', methods=['GET'])
 def metrics():
+	"""
+	Get metrics about the number of predictions that have been served.
+	This includes the total number of predictions, the number of positive predictions,
+	and the number of negative predictions. 
+	"""
+	
 	global countNegPredictions, countPosPredictions
 	m = "# HELP num_predictions The number of predictions that have been served.\n"
 	m += "# TYPE num_predictions counter\n"
