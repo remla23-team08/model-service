@@ -26,10 +26,13 @@ def logging_after(response):
     return response
 
 
-@app.route('/predict', methods=['POST'])
+@app.route("/predict", methods=["POST"])
 def predict():
     """
-    Make a hardcoded prediction
+    Make a prediction using the sentiment analysis model.
+    Update metrics about the number of predictions that have been served.
+    This includes the total number of predictions, the number of positive predictions,
+    and the number of negative predictions.
     ---
     consumes:
       - application/json
@@ -51,65 +54,83 @@ def predict():
     """
 
     # Retrieve review from the request
-    review = request.get_json().get('review')
+    review = request.get_json().get("review")
 
     # Make a prediction on the message
     prediction = int(model_predict(review))
 
     # Update counter based on prediction
-    predictions_counter.labels(api='predict').inc()
+    predictions_counter.labels(api=request.path).inc()
     if prediction == 0:
-        neg_predictions_counter.labels(api='predict').inc()
+        neg_predictions_counter.labels(api=request.path).inc()
     else:
-        pos_predictions_counter.labels(api='predict').inc()
+        pos_predictions_counter.labels(api=request.path).inc()
 
-    response = flask.jsonify({
-        "review": review,
-        "prediction": prediction,
-        "time": 0
-    })
+    response = flask.jsonify({"review": review, "prediction": prediction})
 
     return response
 
 
-@app.route('/model-feedback', methods=['POST'])
+@app.route("/model-accuracy", methods=["POST"])
 def model_feedback():
-    # Retrieve feedback from the request
-    satisfied = bool(request.get_json().get('satisfied'))
-    prediction = int(request.get_json().get('prediction'))
+    """
+    Receive feedback that indicates whether the sentiment of the response was correct given the review.
+    Based on the user's feedback update true/false prediction counters.
+    Gauge model accuracy is updated based on the feedback.
+    Return current model accuracy.
+    """
 
-    # Depending on whether user is satisfied with model response, update true/false prediction counter
-    if satisfied:
+    # Retrieve feedback from the request
+    accurate = bool(request.get_json().get("accurate"))
+    prediction = int(request.get_json().get("prediction"))
+
+    # Depending on whether user thinks model response is accurate, update true/false prediction counter
+    if accurate:
         if prediction == 0:
-            true_neg_predictions_counter.labels(api='model-feedback').inc()
+            true_neg_predictions_counter.labels(api=request.path).inc()
         else:
-            true_pos_predictions_counter.labels(api='model-feedback').inc()
+            true_pos_predictions_counter.labels(api=request.path).inc()
     else:
         if prediction == 0:
-            false_neg_predictions_counter.labels(api='model-feedback').inc()
+            false_neg_predictions_counter.labels(api=request.path).inc()
         else:
-            false_pos_predictions_counter.labels(api='model-feedback').inc()
+            false_pos_predictions_counter.labels(api=request.path).inc()
 
     # calculate current model accuracy based on true/false predictions
-    true_neg_predictions = true_neg_predictions_counter.labels(api='model-feedback')._value.get()
-    true_pos_predictions = true_pos_predictions_counter.labels(api='model-feedback')._value.get()
-    false_neg_predictions = false_neg_predictions_counter.labels(api='model-feedback')._value.get()
-    false_pos_predictions = false_pos_predictions_counter.labels(api='model-feedback')._value.get()
+    true_neg_predictions = true_neg_predictions_counter.labels(
+        api=request.path
+    )._value.get()
+    true_pos_predictions = true_pos_predictions_counter.labels(
+        api=request.path
+    )._value.get()
+    false_neg_predictions = false_neg_predictions_counter.labels(
+        api=request.path
+    )._value.get()
+    false_pos_predictions = false_pos_predictions_counter.labels(
+        api=request.path
+    )._value.get()
 
-    total_feedback = true_neg_predictions + true_pos_predictions + false_neg_predictions + false_pos_predictions
+    total_feedback = (
+        true_neg_predictions
+        + true_pos_predictions
+        + false_neg_predictions
+        + false_pos_predictions
+    )
     accuracy = (true_neg_predictions + true_pos_predictions) / total_feedback
-    model_accuracy_gauge.labels(api='model-feedback').set(accuracy)
+    model_accuracy_gauge.labels(api=request.path).set(accuracy)
 
     # return model accuracy
-    response = flask.jsonify({
-        "model-accuracy": accuracy
-    })
+    response = flask.jsonify({"model-accuracy": accuracy})
 
     return response
 
 
-@app.route('/metrics', methods=['GET'])
+@app.route("/metrics", methods=["GET"])
 def metrics():
+    """
+    Get all metrics defined using the prometheus_client library.
+    """
+
     return Response(generate_latest(), mimetype="text/plain")
 
 
