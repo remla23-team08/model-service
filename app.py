@@ -4,7 +4,7 @@ from model import model_predict
 from flask_cors import CORS
 from flasgger import Swagger
 from prometheus_client import generate_latest
-from metrics import *
+import metrics
 import time
 
 app = Flask(__name__)
@@ -22,7 +22,7 @@ def logging_before():
 def logging_after(response):
     # Get total response time in seconds
     rsp_time = time.perf_counter() - flask.start_time
-    response_time_histogram.labels(api=request.path).observe(rsp_time)
+    metrics.response_time_histogram.labels(api=request.path).observe(rsp_time)
     return response
 
 
@@ -60,11 +60,11 @@ def predict():
     prediction = int(model_predict(review))
 
     # Update counter based on prediction
-    predictions_counter.labels(api=request.path).inc()
+    metrics.predictions_counter.labels(api=request.path).inc()
     if prediction == 0:
-        neg_predictions_counter.labels(api=request.path).inc()
+        metrics.neg_predictions_counter.labels(api=request.path).inc()
     else:
-        pos_predictions_counter.labels(api=request.path).inc()
+        metrics.pos_predictions_counter.labels(api=request.path).inc()
 
     response = flask.jsonify({"review": review, "prediction": prediction})
 
@@ -87,26 +87,26 @@ def model_feedback():
     # Depending on whether user thinks model response is accurate, update true/false prediction counter
     if accurate:
         if prediction == 0:
-            true_neg_predictions_counter.labels(api=request.path).inc()
+            metrics.true_neg_predictions_counter.labels(api=request.path).inc()
         else:
-            true_pos_predictions_counter.labels(api=request.path).inc()
+            metrics.true_pos_predictions_counter.labels(api=request.path).inc()
     else:
         if prediction == 0:
-            false_neg_predictions_counter.labels(api=request.path).inc()
+            metrics.false_neg_predictions_counter.labels(api=request.path).inc()
         else:
-            false_pos_predictions_counter.labels(api=request.path).inc()
+            metrics.false_pos_predictions_counter.labels(api=request.path).inc()
 
     # calculate current model accuracy based on true/false predictions
-    true_neg_predictions = true_neg_predictions_counter.labels(
+    true_neg_predictions = metrics.true_neg_predictions_counter.labels(
         api=request.path
     )._value.get()
-    true_pos_predictions = true_pos_predictions_counter.labels(
+    true_pos_predictions = metrics.true_pos_predictions_counter.labels(
         api=request.path
     )._value.get()
-    false_neg_predictions = false_neg_predictions_counter.labels(
+    false_neg_predictions = metrics.false_neg_predictions_counter.labels(
         api=request.path
     )._value.get()
-    false_pos_predictions = false_pos_predictions_counter.labels(
+    false_pos_predictions = metrics.false_pos_predictions_counter.labels(
         api=request.path
     )._value.get()
 
@@ -117,7 +117,7 @@ def model_feedback():
         + false_pos_predictions
     )
     accuracy = (true_neg_predictions + true_pos_predictions) / total_feedback
-    model_accuracy_gauge.labels(api=request.path).set(accuracy)
+    metrics.model_accuracy_gauge.labels(api=request.path).set(accuracy)
 
     # return model accuracy
     response = flask.jsonify({"model-accuracy": accuracy})
@@ -126,7 +126,7 @@ def model_feedback():
 
 
 @app.route("/metrics", methods=["GET"])
-def metrics():
+def generate_metrics():
     """
     Get all metrics defined using the prometheus_client library.
     """

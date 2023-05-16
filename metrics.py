@@ -49,5 +49,5 @@ response_time_histogram = Histogram(
     name="response_time_seconds",
     documentation="The response time for a request in seconds.",
     labelnames=["api"],
-    buckets=(0.001, 0.002, 0.003, 0.01, 0.025, 0.05, 0.1, 0.5, 1),
+    buckets=(0.001, 0.002, 0.003, 0.01, 0.025, 0.05, 0.1, 0.5, 1, 1.5, 2),
 )
