@@ -1,7 +1,7 @@
-# requirements.txt
 Flask==2.2.4
 flasgger==0.9.4
 joblib
 scikit-learn
 nltk
 flask-cors
+flake8
