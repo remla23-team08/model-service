@@ -5,3 +5,4 @@ joblib
 scikit-learn
 nltk
 flask-cors
+prometheus_client
