@@ -3,19 +3,36 @@ from flask import Flask, request, Response
 from model import model_predict
 from flask_cors import CORS
 from flasgger import Swagger
+from prometheus_client import generate_latest
+import metrics
+import time
 
 app = Flask(__name__)
 CORS(app)
 swagger = Swagger(app)
 
-countPosPredictions = 0
-countNegPredictions = 0
+
+@app.before_request
+def logging_before():
+    # Store the start time for the request
+    flask.start_time = time.perf_counter()
+
+
+@app.after_request
+def logging_after(response):
+    # Get total response time in seconds
+    rsp_time = time.perf_counter() - flask.start_time
+    metrics.response_time_histogram.labels(api=request.path).observe(rsp_time)
+    return response
 
 
 @app.route("/predict", methods=["POST"])
 def predict():
     """
-        Make a hardcoded prediction
+    Make a prediction using the sentiment analysis model.
+    Update metrics about the number of predictions that have been served.
+    This includes the total number of predictions, the number of positive predictions,
+    and the number of negative predictions.
     ---
     consumes:
       - application/json
@@ -43,47 +60,78 @@ def predict():
     prediction = int(model_predict(review))
 
     # Update counter based on prediction
+    metrics.predictions_counter.labels(api=request.path).inc()
     if prediction == 0:
-        global countNegPredictions
-        countNegPredictions += 1
+        metrics.neg_predictions_counter.labels(api=request.path).inc()
     else:
-        global countPosPredictions
-        countPosPredictions += 1
+        metrics.pos_predictions_counter.labels(api=request.path).inc()
 
-    response = flask.jsonify(
-        {
-            "review": review,
-            "prediction": prediction,
-        }
+    response = flask.jsonify({"review": review, "prediction": prediction})
+
+    return response
+
+
+@app.route("/model-accuracy", methods=["POST"])
+def model_feedback():
+    """
+    Receive feedback that indicates whether the sentiment of the response was correct given the review.
+    Based on the user's feedback update true/false prediction counters.
+    Gauge model accuracy is updated based on the feedback.
+    Return current model accuracy.
+    """
+
+    # Retrieve feedback from the request
+    accurate = bool(request.get_json().get("accurate"))
+    prediction = int(request.get_json().get("prediction"))
+
+    # Depending on whether user thinks model response is accurate, update true/false prediction counter
+    if accurate:
+        if prediction == 0:
+            metrics.true_neg_predictions_counter.labels(api=request.path).inc()
+        else:
+            metrics.true_pos_predictions_counter.labels(api=request.path).inc()
+    else:
+        if prediction == 0:
+            metrics.false_neg_predictions_counter.labels(api=request.path).inc()
+        else:
+            metrics.false_pos_predictions_counter.labels(api=request.path).inc()
+
+    # calculate current model accuracy based on true/false predictions
+    true_neg_predictions = metrics.true_neg_predictions_counter.labels(
+        api=request.path
+    )._value.get()
+    true_pos_predictions = metrics.true_pos_predictions_counter.labels(
+        api=request.path
+    )._value.get()
+    false_neg_predictions = metrics.false_neg_predictions_counter.labels(
+        api=request.path
+    )._value.get()
+    false_pos_predictions = metrics.false_pos_predictions_counter.labels(
+        api=request.path
+    )._value.get()
+
+    total_feedback = (
+        true_neg_predictions
+        + true_pos_predictions
+        + false_neg_predictions
+        + false_pos_predictions
     )
+    accuracy = (true_neg_predictions + true_pos_predictions) / total_feedback
+    metrics.model_accuracy_gauge.labels(api=request.path).set(accuracy)
+
+    # return model accuracy
+    response = flask.jsonify({"model-accuracy": accuracy})
 
     return response
 
 
 @app.route("/metrics", methods=["GET"])
-def metrics():
+def generate_metrics():
     """
-    Get metrics about the number of predictions that have been served.
-    This includes the total number of predictions, the number of positive predictions,
-    and the number of negative predictions.
+    Get all metrics defined using the prometheus_client library.
     """
 
-    global countNegPredictions, countPosPredictions
-    m = "# HELP num_predictions The number of predictions that have been served.\n"
-    m += "# TYPE num_predictions counter\n"
-    m += 'num_predictions{{page="predict"}} {}\n'.format(
-        countPosPredictions + countNegPredictions
-    )
-
-    m += "# HELP num_pos_predictions The number of positive predictions that have been served.\n"
-    m += "# TYPE num_pos_predictions counter\n"
-    m += 'num_pos_predictions{{page="predict"}} {}\n'.format(countPosPredictions)
-
-    m += "# HELP num_neg_predictions The number of negative predictions that have been served.\n"
-    m += "# TYPE num_neg_predictions counter\n"
-    m += 'num_neg_predictions{{page="predict"}} {}\n'.format(countNegPredictions)
-
-    return Response(m, mimetype="text/plain")
+    return Response(generate_latest(), mimetype="text/plain")
 
 
 if __name__ == "__main__":

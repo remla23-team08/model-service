@@ -1,7 +1,8 @@
-Flask==2.2.4
 flasgger==0.9.4
-joblib
-scikit-learn
-nltk
+Flask==2.2.4
 flask-cors
 flake8
+joblib
+nltk
+prometheus_client
+scikit-learn

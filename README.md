@@ -82,7 +82,7 @@ we are using the [flake8](https://flake8.pycqa.org/en/latest/) tool. To install 
 pip install flake8
 ```
 
-> **NOTE**: It is preffered to use a `venv` to install packages, as mentioned in the [Usage](#usage) section.
+> **NOTE**: It is preferred to use a `venv` to install packages, as mentioned in the [Usage](#usage) section.
 
 To run the flake8 tool on the python files using our custom configuration, execute the following command from within the root folder of this repository:
 
