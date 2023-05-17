@@ -14,6 +14,7 @@ swagger = Swagger(app)
 
 @app.before_request
 def logging_before():
+    metrics.http_requests_counter.labels(api=request.path).inc()
     # Store the start time for the request
     flask.start_time = time.perf_counter()
 

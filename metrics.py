@@ -1,6 +1,11 @@
 from prometheus_client import Counter, Gauge, Histogram
 
 # counters
+http_requests_counter = Counter(
+    name="http_requests",
+    documentation="The number of http requests served.",
+    labelnames=["api"],
+)
 pos_predictions_counter = Counter(
     name="pos_predictions",
     documentation="The number of positive predictions served.",
