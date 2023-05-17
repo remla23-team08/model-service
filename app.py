@@ -31,7 +31,9 @@ def logging_after(response):
 def predict():
     """
     Make a prediction using the sentiment analysis model.
-    Update metrics about the number of predictions that have been served.
+    Given user review predict the sentiment of that review.
+    Predictions can be 0 (negative sentiment) or 1 (positive sentiment).
+    Updates metrics about the number of predictions that have been served.
     This includes the total number of predictions, the number of positive predictions,
     and the number of negative predictions.
     ---
@@ -40,7 +42,7 @@ def predict():
     parameters:
         - name: input_data
           in: body
-          description: review to be classified.
+          description: review to be classified
           required: True
           schema:
             type: object
@@ -48,10 +50,24 @@ def predict():
             properties:
                 review:
                     type: string
-                    example: This is a bad/good review
+                    example: This is a bad/good review.
+        - name: output_data
+          in: body
+          description: sentiment prediction of the received review
+          required: True
+          schema:
+            type: object
+            required: true
+            properties:
+                review:
+                    type: string
+                    example: This is a bad/good review.
+                prediction:
+                    type: integer
+                    example: 0
     responses:
       200:
-        description: Some result
+        description: Successful response
     """
 
     # Retrieve review from the request
@@ -76,9 +92,42 @@ def predict():
 def model_feedback():
     """
     Receive feedback that indicates whether the sentiment of the response was correct given the review.
+    User rates prediction as either accurate or not accurate.
     Based on the user's feedback update true/false prediction counters.
-    Gauge model accuracy is updated based on the feedback.
-    Return current model accuracy.
+    Gauge model accuracy is updated based on total number of true/false predictions.
+    Returns current model accuracy.
+    ---
+    consumes:
+      - application/json
+    parameters:
+        - name: input_data
+          in: body
+          description: feedback from the user about the accuracy of the sentiment prediction
+          required: True
+          schema:
+            type: object
+            required: true
+            properties:
+                accurate:
+                    type: boolean
+                    example: false
+                prediction:
+                    type: int
+                    example: 1
+        - name: output_data
+          in: body
+          description: accuracy calculated based on total number of true/false predictions
+          required: True
+          schema:
+            type: object
+            required: true
+            properties:
+                model-accuracy:
+                    type: float
+                    example: 0.9
+    responses:
+      200:
+        description: Successful response
     """
 
     # Retrieve feedback from the request
@@ -129,7 +178,16 @@ def model_feedback():
 @app.route("/metrics", methods=["GET"])
 def generate_metrics():
     """
-    Get all metrics defined using the prometheus_client library.
+    Get all metrics defined using the prometheus client library.
+    ---
+    parameters:
+        - name: output_data
+          in: body
+          description: prometheus metrics observed from monitoring requests
+          required: True
+    responses:
+      200:
+        description: Successful response
     """
 
     return Response(generate_latest(), mimetype="text/plain")
