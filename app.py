@@ -51,6 +51,9 @@ def predict():
                 review:
                     type: string
                     example: This is a bad/good review.
+                restaurantName:
+                    type: string
+                    example: name
         - name: output_data
           in: body
           description: sentiment prediction of the received review
@@ -114,6 +117,9 @@ def model_feedback():
                 prediction:
                     type: int
                     example: 1
+                restaurantName:
+                    type: string
+                    example: name
         - name: output_data
           in: body
           description: accuracy calculated based on total number of true/false predictions
