@@ -84,13 +84,21 @@ def predict():
     prediction = int(model_predict(review))
 
     # Update counter based on prediction
-    metrics.predictions_counter.labels(api=request.path, restaurant_name=restaurant_name).inc()
+    metrics.predictions_counter.labels(
+        api=request.path, restaurant_name=restaurant_name
+    ).inc()
     if prediction == 0:
-        metrics.neg_predictions_counter.labels(api=request.path, restaurant_name=restaurant_name).inc()
+        metrics.neg_predictions_counter.labels(
+            api=request.path, restaurant_name=restaurant_name
+        ).inc()
     else:
-        metrics.pos_predictions_counter.labels(api=request.path, restaurant_name=restaurant_name).inc()
+        metrics.pos_predictions_counter.labels(
+            api=request.path, restaurant_name=restaurant_name
+        ).inc()
 
-    response = flask.jsonify({"review": review, "prediction": prediction, "restaurantName": restaurant_name})
+    response = flask.jsonify(
+        {"review": review, "prediction": prediction, "restaurantName": restaurant_name}
+    )
 
     return response
 
@@ -148,18 +156,25 @@ def model_feedback():
     prediction = int(request.get_json().get("prediction"))
     restaurant_name = request.get_json().get("restaurantName")
 
-
     # Depending on whether user thinks model response is accurate, update true/false prediction counter
     if accurate:
         if prediction == 0:
-            metrics.true_neg_predictions_counter.labels(api=request.path, restaurant_name=restaurant_name).inc()
+            metrics.true_neg_predictions_counter.labels(
+                api=request.path, restaurant_name=restaurant_name
+            ).inc()
         else:
-            metrics.true_pos_predictions_counter.labels(api=request.path, restaurant_name=restaurant_name).inc()
+            metrics.true_pos_predictions_counter.labels(
+                api=request.path, restaurant_name=restaurant_name
+            ).inc()
     else:
         if prediction == 0:
-            metrics.false_neg_predictions_counter.labels(api=request.path, restaurant_name=restaurant_name).inc()
+            metrics.false_neg_predictions_counter.labels(
+                api=request.path, restaurant_name=restaurant_name
+            ).inc()
         else:
-            metrics.false_pos_predictions_counter.labels(api=request.path, restaurant_name=restaurant_name).inc()
+            metrics.false_pos_predictions_counter.labels(
+                api=request.path, restaurant_name=restaurant_name
+            ).inc()
 
     # calculate current model accuracy based on true/false predictions
     true_neg_predictions = metrics.true_neg_predictions_counter.labels(
@@ -182,10 +197,14 @@ def model_feedback():
         + false_pos_predictions
     )
     accuracy = (true_neg_predictions + true_pos_predictions) / total_feedback
-    metrics.model_accuracy_gauge.labels(api=request.path, restaurant_name=restaurant_name).set(accuracy)
+    metrics.model_accuracy_gauge.labels(
+        api=request.path, restaurant_name=restaurant_name
+    ).set(accuracy)
 
     # return model accuracy
-    response = flask.jsonify({"model-accuracy": accuracy, "restaurantName": restaurant_name})
+    response = flask.jsonify(
+        {"model-accuracy": accuracy, "restaurantName": restaurant_name}
+    )
 
     return response
 
