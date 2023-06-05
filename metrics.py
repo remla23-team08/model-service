@@ -4,42 +4,42 @@ from prometheus_client import Counter, Gauge, Histogram
 http_requests_counter = Counter(
     name="http_requests",
     documentation="Total number of http requests.",
-    labelnames=["api"],
+    labelnames=["api", "restaurant_name"],
 )
 pos_predictions_counter = Counter(
     name="pos_predictions",
     documentation="Total number of positive predictions.",
-    labelnames=["api"],
+    labelnames=["api", "restaurant_name"],
 )
 neg_predictions_counter = Counter(
     name="neg_predictions",
     documentation="Total number of negative predictions.",
-    labelnames=["api"],
+    labelnames=["api", "restaurant_name"],
 )
 predictions_counter = Counter(
     name="predictions",
     documentation="Total number of predictions.",
-    labelnames=["api"],
+    labelnames=["api", "restaurant_name"],
 )
 true_pos_predictions_counter = Counter(
     name="true_pos_predictions",
     documentation="Total number of true positive predictions.",
-    labelnames=["api"],
+    labelnames=["api", "restaurant_name"],
 )
 true_neg_predictions_counter = Counter(
     name="true_neg_predictions",
     documentation="Total number of true negative predictions.",
-    labelnames=["api"],
+    labelnames=["api", "restaurant_name"],
 )
 false_pos_predictions_counter = Counter(
     name="false_pos_predictions",
     documentation="Total number of false positive predictions.",
-    labelnames=["api"],
+    labelnames=["api", "restaurant_name"],
 )
 false_neg_predictions_counter = Counter(
     name="false_neg_predictions",
     documentation="Total number of false negative predictions.",
-    labelnames=["api"],
+    labelnames=["api", "restaurant_name"],
 )
 
 # gauges
