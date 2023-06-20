@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y \
   vim \
   wget \
   curl \
-  lsof
+  lsof \
+  iputils-ping
 
 LABEL authors="Team 08 REMLA" \
   description="Model Service API for Sentiment Analysis"
