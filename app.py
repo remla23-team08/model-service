@@ -14,16 +14,25 @@ swagger = Swagger(app)
 
 @app.before_request
 def logging_before():
-    metrics.http_requests_counter.labels(api=request.path).inc()
-    # Store the start time for the request
-    flask.start_time = time.perf_counter()
+    # metrics should be excluded from user requests since it is used for monitoring purposes by Prometheus
+    if request.path != "/metrics":
+        metrics.http_requests_counter.labels(api=request.path).inc()
+        # Store the start time for the request
+        flask.start_time = time.perf_counter()
 
 
 @app.after_request
 def logging_after(response):
-    # Get total response time in seconds
-    rsp_time = time.perf_counter() - flask.start_time
-    metrics.response_time_histogram.labels(api=request.path).observe(rsp_time)
+    # metrics should be excluded from user requests since it is used for monitoring purposes by Prometheus
+    if request.path != "/metrics" and not response.direct_passthrough:
+        # Get total response time in seconds
+        rsp_time = time.perf_counter() - flask.start_time
+        metrics.response_time_histogram.labels(api=request.path).observe(rsp_time)
+
+        # Record the response size
+        metrics.response_size_summary.labels(api=request.path).observe(
+            len(response.data)
+        )
     return response
 
 
