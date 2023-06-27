@@ -6,6 +6,7 @@ from flasgger import Swagger
 from prometheus_client import generate_latest
 import metrics
 import time
+from utils import download_model_files
 
 app = Flask(__name__)
 CORS(app)
@@ -237,4 +238,5 @@ def generate_metrics():
 
 
 if __name__ == "__main__":
+    download_model_files()
     app.run(host="0.0.0.0", port=8080, debug=True)

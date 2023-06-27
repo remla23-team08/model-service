@@ -20,8 +20,6 @@ COPY requirements.txt /root/
 COPY app.py /root/
 COPY model.py /root/
 COPY metrics.py /root/
-COPY ml-model/c1_BoW_Sentiment_Model.pkl /root/ml-model/c1_BoW_Sentiment_Model.pkl
-COPY ml-model/c2_Classifier_Sentiment_Model /root/ml-model/c2_Classifier_Sentiment_Model
 
 # Install the required packages
 RUN pip install -r requirements.txt
