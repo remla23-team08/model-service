@@ -1,4 +1,4 @@
-from prometheus_client import Counter, Gauge, Histogram
+from prometheus_client import Counter, Gauge, Histogram, Summary
 
 # counters
 http_requests_counter = Counter(
@@ -55,4 +55,11 @@ response_time_histogram = Histogram(
     documentation="Response time of requests in seconds.",
     labelnames=["api"],
     buckets=(0.001, 0.002, 0.003, 0.01, 0.025, 0.05, 0.1, 0.5, 1, 1.5, 2),
+)
+
+# summaries
+response_size_summary = Summary(
+    name="response_size_summary",
+    documentation="Summary of response sizes",
+    labelnames=["api"],
 )
