@@ -24,17 +24,15 @@ def logging_before():
 @app.after_request
 def logging_after(response):
     # metrics should be excluded from user requests since it is used for monitoring purposes by Prometheus
-    if request.path != "/metrics":
+    if request.path != "/metrics" and not response.direct_passthrough:
         # Get total response time in seconds
         rsp_time = time.perf_counter() - flask.start_time
         metrics.response_time_histogram.labels(api=request.path).observe(rsp_time)
 
         # Record the response size
-        print(response.data)
         metrics.response_size_summary.labels(api=request.path).observe(
             len(response.data)
         )
-
     return response
 
 
