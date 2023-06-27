@@ -20,6 +20,7 @@ COPY requirements.txt /root/
 COPY app.py /root/
 COPY model.py /root/
 COPY metrics.py /root/
+COPY utils.py /root/
 
 # Install the required packages
 RUN pip install -r requirements.txt
