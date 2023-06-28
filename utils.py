@@ -22,5 +22,7 @@ def download_model_files():
     bow_model_path = os.path.join(model_dir, bow_model_name)
     classifier_model_path = os.path.join(model_dir, classifier_model_name)
 
-    gdown.download(bow_model_url, bow_model_path, quiet=False)
-    gdown.download(classifier_model_url, classifier_model_path, quiet=False)
+    if not os.path.exists(bow_model_path):
+        gdown.download(bow_model_url, bow_model_path, quiet=False)
+    if not os.path.exists(classifier_model_path):
+        gdown.download(classifier_model_url, classifier_model_path, quiet=False)
