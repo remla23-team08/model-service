@@ -4,6 +4,7 @@ import re
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
+from libpython import preprocessing
 
 
 def model_predict(review):
@@ -15,30 +16,11 @@ def model_predict(review):
     classifier = joblib.load("ml-model/c2_Classifier_Sentiment_Model")
 
     # Process input
-    processed = process(review)
+    preprocess_class = preprocessing.Preprocessing()
+    processed = preprocess_class.preprocess_review(review)
     processed = model.transform([processed]).toarray()[0]
 
     # Make a prediction
     prediction = classifier.predict([processed])[0]
 
     return prediction
-
-
-def process(review):
-    """
-    Preprocess the given input
-    """
-
-    nltk.download("stopwords")
-    ps = PorterStemmer()
-
-    all_stopwords = stopwords.words("english")
-    all_stopwords.remove("not")
-
-    review = re.sub("[^a-zA-Z]", " ", review)
-    review = review.lower()
-    review = review.split()
-    review = [ps.stem(word) for word in review if word not in set(all_stopwords)]
-    review = " ".join(review)
-
-    return review
