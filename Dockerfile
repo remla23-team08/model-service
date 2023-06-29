@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.7-slim
 
 # Set working directory to root
 WORKDIR /root
@@ -12,6 +12,9 @@ RUN apt-get update && apt-get install -y \
   lsof \
   iputils-ping
 
+# Install Git (needed for install git package in requirements.txt)
+RUN apt-get install -y git
+
 LABEL authors="Team 08 REMLA" \
   description="Model Service API for Sentiment Analysis"
 
@@ -20,8 +23,7 @@ COPY requirements.txt /root/
 COPY app.py /root/
 COPY model.py /root/
 COPY metrics.py /root/
-COPY ml-model/c1_BoW_Sentiment_Model.pkl /root/ml-model/c1_BoW_Sentiment_Model.pkl
-COPY ml-model/c2_Classifier_Sentiment_Model /root/ml-model/c2_Classifier_Sentiment_Model
+COPY utils.py /root/
 
 # Install the required packages
 RUN pip install -r requirements.txt
