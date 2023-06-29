@@ -8,3 +8,4 @@ joblib==1.2.0
 nltk==3.8.1
 prometheus-client==0.17.0
 scikit-learn==1.0.2
+libpython @ git+https://github.com/remla23-team08/libpython
