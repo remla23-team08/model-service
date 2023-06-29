@@ -12,6 +12,9 @@ RUN apt-get update && apt-get install -y \
   lsof \
   iputils-ping
 
+# Install Git (needed for install git package in requirements.txt)
+RUN apt-get install -y git
+
 LABEL authors="Team 08 REMLA" \
   description="Model Service API for Sentiment Analysis"
 
