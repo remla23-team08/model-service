@@ -2,6 +2,18 @@
 
 Contains the wrapper service for an embedded ML model used for performing sentiment analysis on reviews for restaurants.
 
+## **Table of Contents**
+
+- [Model-Service](#model-service)
+  - [**Table of Contents**](#table-of-contents)
+  - [**Pre-requisites**](#pre-requisites)
+  - [**Usage**](#usage)
+  - [**Available endpoints**](#available-endpoints)
+  - [**Docker Setup**](#docker-setup)
+  - [**Code Style**](#code-style)
+  - [**Versioning**](#versioning)
+  - [**Additional Information**](#additional-information)
+
 ## **Pre-requisites**
 
 Before following the steps elicited in the upcoming sections, you need to download the latest trained model from the [remla23-team08/model-training](https://github.com/remla23-team08/model-training) repository. 
